@@ -146,8 +146,33 @@ from pathlib import Path
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-frontend_dir = Path(__file__).parent.parent / "frontend"
-if frontend_dir.exists() and (frontend_dir / "index.html").exists():
+root_dir = Path(__file__).parent.parent
+website_dir = root_dir / "website"
+frontend_dir = root_dir / "frontend"
+
+if website_dir.exists() and (website_dir / "index.html").exists():
+    # Serve the production website (landing + app) built with HTML/CSS/JS.
+    app.mount("/assets", StaticFiles(directory=str(website_dir / "assets")), name="assets")
+
+    @app.get("/", include_in_schema=False)
+    async def serve_landing():
+        return FileResponse(str(website_dir / "index.html"))
+
+    @app.get("/app.html", include_in_schema=False)
+    @app.get("/app", include_in_schema=False)
+    async def serve_app():
+        return FileResponse(str(website_dir / "app.html"))
+
+    @app.get("/index.html", include_in_schema=False)
+    async def serve_index():
+        return FileResponse(str(website_dir / "index.html"))
+
+    # Keep the legacy single-file frontend available at /ui for reference.
+    if frontend_dir.exists() and (frontend_dir / "index.html").exists():
+        app.mount("/ui", StaticFiles(directory=str(frontend_dir), html=True), name="legacy_frontend")
+
+elif frontend_dir.exists() and (frontend_dir / "index.html").exists():
+    # Fallback: serve the legacy frontend if the website folder is missing.
     app.mount("/ui", StaticFiles(directory=str(frontend_dir), html=True), name="frontend")
 
     @app.get("/", include_in_schema=False)

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScholarAI — App</title>
+  <meta name="description" content="ScholarAI application — chat with your papers, upload PDFs, summarize and generate literature reviews." />
+  <meta name="theme-color" content="#060810" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="stylesheet" href="assets/css/app.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%236366f1'/><text y='72' x='50' font-size='60' text-anchor='middle' fill='white'>S</text></svg>" />
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- ===== TOP BAR ===== -->
+  <header class="app-bar">
+    <div class="container">
+      <a href="index.html" class="brand">
+        <span class="brand-logo">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        </span>
+        ScholarAI
+      </a>
+      <div style="display:flex; align-items:center; gap:12px">
+        <div id="statusPill" class="status-pill">
+          <span class="dot pulse"></span>
+          <span id="statusText">Connecting…</span>
+        </div>
+        <button id="settingsBtn" class="icon-btn" title="Backend settings" style="width:38px;height:38px;border:1px solid var(--border-strong)">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== MAIN ===== -->
+  <main class="app-main">
+    <div class="container app-layout">
+
+      <!-- Sidebar -->
+      <aside class="side">
+        <nav class="tabs" id="tabs">
+          <button class="tab active" data-tab="chat">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+            Chat
+          </button>
+          <button class="tab" data-tab="upload">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+            Upload
+          </button>
+          <button class="tab" data-tab="papers">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            Papers
+          </button>
+          <button class="tab" data-tab="summarize">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Summarize
+          </button>
+          <button class="tab" data-tab="review">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            Lit Review
+          </button>
+        </nav>
+        <div class="side-note">
+          Connected to your FastAPI backend. Change the endpoint anytime with the ⚙ settings button.
+        </div>
+      </aside>
+
+      <!-- Content -->
+      <section>
+
+        <!-- CHAT -->
+        <div class="panel active" id="panel-chat">
+          <div class="panel-head"><h2>Chat with your papers</h2><p>Ask anything — answers come with citations from your indexed documents.</p></div>
+          <div class="card glass">
+            <div class="chat-window" id="chatWindow">
+              <div class="chat-empty" id="chatEmpty">
+                <div class="big">💬</div>
+                <p>Ask a question to get started</p>
+              </div>
+            </div>
+            <div class="chat-input-row">
+              <input class="input" id="chatInput" placeholder="e.g. What is the attention mechanism?" autocomplete="off" />
+              <button class="btn btn-primary" id="sendBtn">Ask →</button>
+            </div>
+            <div class="chips" id="exampleChips">
+              <button class="chip">What is the attention mechanism?</button>
+              <button class="chip">How does the methodology work?</button>
+              <button class="chip">What are the key findings?</button>
+              <button class="chip">What are the limitations?</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- UPLOAD -->
+        <div class="panel" id="panel-upload">
+          <div class="panel-head"><h2>Upload a paper</h2><p>Drop a PDF to extract, chunk, embed and index it.</p></div>
+          <div class="card glass">
+            <div class="dropzone" id="dropzone">
+              <div class="dz-ico">📄</div>
+              <h3>Drop your PDF here</h3>
+              <p>or click to browse · max 50MB</p>
+              <input type="file" id="fileInput" accept="application/pdf" hidden />
+            </div>
+            <div class="steps-progress" id="uploadSteps">
+              <div class="pstep" data-step="extract"><span class="pico">○</span> Extracting text & metadata</div>
+              <div class="pstep" data-step="chunk"><span class="pico">○</span> Chunking document</div>
+              <div class="pstep" data-step="embed"><span class="pico">○</span> Generating embeddings</div>
+              <div class="pstep" data-step="index"><span class="pico">○</span> Indexing in Qdrant</div>
+            </div>
+            <div id="uploadResult" class="result"></div>
+          </div>
+        </div>
+
+        <!-- PAPERS -->
+        <div class="panel" id="panel-papers">
+          <div class="panel-head" style="display:flex; justify-content:space-between; align-items:flex-end">
+            <div><h2>Indexed papers</h2><p>Stored as 384-dim vectors in Qdrant Cloud.</p></div>
+            <button class="btn btn-ghost" id="refreshPapers" style="padding:9px 16px">↻ Refresh</button>
+          </div>
+          <div id="papersList" class="papers"></div>
+        </div>
+
+        <!-- SUMMARIZE -->
+        <div class="panel" id="panel-summarize">
+          <div class="panel-head"><h2>Summarize a paper</h2><p>Generate a structured summary with key findings.</p></div>
+          <div class="card glass">
+            <div class="field">
+              <label class="field-label">Paper</label>
+              <select class="input" id="sumPaper"><option>Loading papers…</option></select>
+            </div>
+            <div class="field">
+              <label class="field-label">Summary type</label>
+              <select class="input" id="sumType">
+                <option value="brief">Brief</option>
+                <option value="comprehensive" selected>Comprehensive</option>
+                <option value="technical">Technical</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" id="sumBtn">Generate summary</button>
+            <div id="sumResult" class="result"></div>
+          </div>
+        </div>
+
+        <!-- REVIEW -->
+        <div class="panel" id="panel-review">
+          <div class="panel-head"><h2>Literature review</h2><p>Synthesize themes, gaps and future directions across papers.</p></div>
+          <div class="card glass">
+            <div class="field">
+              <label class="field-label">Topic</label>
+              <input class="input" id="revTopic" placeholder="e.g. attention mechanisms in NLP" />
+            </div>
+            <button class="btn btn-primary" id="revBtn">Generate review</button>
+            <div id="revResult" class="result"></div>
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- Settings modal -->
+<div class="modal-backdrop" id="settingsModal">
+  <div class="modal glass">
+    <h3>Backend endpoint</h3>
+    <p>Point the app at your FastAPI server. Leave the default to use the live HuggingFace Space.</p>
+    <div class="field">
+      <label class="field-label">API base URL</label>
+      <input class="input" id="apiInput" placeholder="https://your-backend.hf.space" />
+    </div>
+    <div style="display:flex; gap:10px; justify-content:flex-end">
+      <button class="btn btn-ghost" id="settingsCancel">Cancel</button>
+      <button class="btn btn-primary" id="settingsSave">Save & reconnect</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

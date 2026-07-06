@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ScholarAI — Automated Research Assistant | RAG-powered paper Q&A</title>
+  <meta name="description" content="ScholarAI turns dense research papers into instant, citation-backed answers. Upload PDFs, ask questions, generate summaries and literature reviews — powered by RAG, Groq LLMs and vector search." />
+  <meta name="theme-color" content="#060810" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="ScholarAI — Automated Research Assistant" />
+  <meta property="og:description" content="Cited answers from your research papers in seconds. RAG + Groq + Qdrant." />
+  <meta property="og:type" content="website" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%236366f1'/><text y='72' x='50' font-size='60' text-anchor='middle' fill='white'>S</text></svg>" />
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <nav class="nav" id="nav">
+    <div class="container">
+      <a href="#top" class="brand">
+        <span class="brand-logo">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        </span>
+        ScholarAI
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#showcase">Product</a>
+        <a href="#tech">Tech</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="nav-cta">
+        <a href="https://github.com/vamsi-op/AUTOMATED-RESEARCH-ASSISTANT" target="_blank" rel="noopener" class="btn btn-ghost" style="padding:9px 16px">
+          <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-1.7c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.8-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg>
+          <span class="hide-sm">GitHub</span>
+        </a>
+        <a href="app.html" class="btn btn-primary">Launch App →</a>
+        <button class="nav-toggle" id="navToggle" aria-label="Menu">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <span id="top"></span>
+
+  <!-- ============ HERO ============ -->
+  <header class="hero">
+    <div class="hero-bg">
+      <div class="grid-overlay"></div>
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+    <div class="container hero-inner">
+      <div class="hero-badge reveal in">
+        <span class="dot"></span> Live · Powered by RAG + Groq LLaMA 3.1
+      </div>
+      <h1 class="reveal in">
+        Turn research papers into<br />
+        <span class="grad-text">cited answers</span> in seconds
+      </h1>
+      <p class="hero-sub reveal in d1">
+        ScholarAI reads your PDFs, understands them with vector search, and answers your
+        questions with real citations — no more scrolling through 30 pages to find one fact.
+      </p>
+      <div class="hero-actions reveal in d2">
+        <a href="app.html" class="btn btn-primary btn-lg">
+          Try it free
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </a>
+        <a href="#how" class="btn btn-ghost btn-lg">See how it works</a>
+      </div>
+      <div class="hero-stats reveal in d3">
+        <div class="stat"><div class="stat-num grad-text" data-count="384">0</div><div class="stat-label">Dim vectors</div></div>
+        <div class="stat"><div class="stat-num grad-text" data-count="5"></div><div class="stat-label">AI capabilities</div></div>
+        <div class="stat"><div class="stat-num grad-text" data-count="100" data-suffix="%">0</div><div class="stat-label">Open source</div></div>
+        <div class="stat"><div class="stat-num grad-text" data-count="2" data-suffix="s">0</div><div class="stat-label">Avg answer time</div></div>
+      </div>
+    </div>
+    <div class="scroll-hint">
+      <div class="mouse"><span></span></div>
+      Scroll
+    </div>
+  </header>
+
+  <!-- ============ TECH MARQUEE ============ -->
+  <div class="marquee-wrap">
+    <div class="marquee">
+      <span class="marquee-item">⚡ FastAPI</span>
+      <span class="marquee-item">🧠 Groq LLaMA 3.1</span>
+      <span class="marquee-item">🔎 Qdrant Vector DB</span>
+      <span class="marquee-item">🔗 LangChain Agents</span>
+      <span class="marquee-item">📐 Sentence Transformers</span>
+      <span class="marquee-item">🐳 Docker</span>
+      <span class="marquee-item">🤗 HuggingFace Spaces</span>
+      <!-- duplicate for seamless loop -->
+      <span class="marquee-item">⚡ FastAPI</span>
+      <span class="marquee-item">🧠 Groq LLaMA 3.1</span>
+      <span class="marquee-item">🔎 Qdrant Vector DB</span>
+      <span class="marquee-item">🔗 LangChain Agents</span>
+      <span class="marquee-item">📐 Sentence Transformers</span>
+      <span class="marquee-item">🐳 Docker</span>
+      <span class="marquee-item">🤗 HuggingFace Spaces</span>
+    </div>
+  </div>
+
+  <!-- ============ FEATURES ============ -->
+  <section class="section" id="features">
+    <div class="container">
+      <div class="text-center">
+        <span class="eyebrow reveal">✦ Capabilities</span>
+        <h2 class="section-title reveal d1">Everything you need to<br /><span class="grad-text">read less, learn more</span></h2>
+        <p class="section-sub reveal d2">Five AI-powered tools built on a production RAG pipeline — from instant Q&A to full literature reviews.</p>
+      </div>
+
+      <div class="features-grid">
+        <article class="feature-card glass reveal" data-tilt>
+          <div class="feature-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg></div>
+          <h3>Cited Q&A</h3>
+          <p>Ask any question about your papers and get answers grounded in the source text, with page-level citations you can verify.</p>
+        </article>
+        <article class="feature-card glass reveal d1" data-tilt>
+          <div class="feature-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg></div>
+          <h3>Smart Summaries</h3>
+          <p>Generate brief, comprehensive, or technical summaries with extracted key findings, methodology and limitations.</p>
+        </article>
+        <article class="feature-card glass reveal d2" data-tilt>
+          <div class="feature-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div>
+          <h3>Literature Reviews</h3>
+          <p>Synthesize a whole topic across papers — key themes, research gaps and future directions, generated automatically.</p>
+        </article>
+        <article class="feature-card glass reveal" data-tilt>
+          <div class="feature-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+          <h3>ReAct Agent</h3>
+          <p>An intent-routing LangChain agent picks the right tool for each request and chains steps to reason through complex asks.</p>
+        </article>
+        <article class="feature-card glass reveal d1" data-tilt>
+          <div class="feature-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg></div>
+          <h3>Drag & Drop Upload</h3>
+          <p>Drop a PDF and watch it get parsed, chunked, embedded and indexed into vector storage in real time.</p>
+        </article>
+        <article class="feature-card glass reveal d2" data-tilt>
+          <div class="feature-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+          <h3>Hybrid Retrieval</h3>
+          <p>Semantic + keyword search over 384-dim embeddings finds the most relevant passages, not just keyword matches.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HOW IT WORKS ============ -->
+  <section class="section section-sm" id="how" style="background:var(--bg-soft); border-top:1px solid var(--border); border-bottom:1px solid var(--border)">
+    <div class="container">
+      <div class="text-center">
+        <span class="eyebrow reveal">✦ Pipeline</span>
+        <h2 class="section-title reveal d1">From PDF to answer in four steps</h2>
+        <p class="section-sub reveal d2">A transparent RAG pipeline — no black boxes.</p>
+      </div>
+      <div class="steps">
+        <div class="step reveal"><div class="step-num">1</div><h4>Upload</h4><p>Drop in a research PDF. We extract text, metadata and section structure.</p></div>
+        <div class="step reveal d1"><div class="step-num">2</div><h4>Embed</h4><p>Text is chunked and turned into 384-dim vectors, indexed in Qdrant Cloud.</p></div>
+        <div class="step reveal d2"><div class="step-num">3</div><h4>Retrieve</h4><p>Your question triggers hybrid search to pull the most relevant passages.</p></div>
+        <div class="step reveal d3"><div class="step-num">4</div><h4>Generate</h4><p>Groq's LLaMA 3.1 composes a grounded answer with inline citations.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SHOWCASE ============ -->
+  <section class="section" id="showcase">
+    <div class="container showcase">
+      <div class="showcase-copy reveal">
+        <span class="eyebrow">✦ In action</span>
+        <h2 style="margin-top:18px">Answers you can<br /><span class="grad-text">actually trust</span></h2>
+        <p>Every response is backed by the exact passages it came from. Click a citation to jump straight to the source — perfect for literature reviews, thesis work and staying honest with your references.</p>
+        <ul class="check-list">
+          <li><span class="ic"><svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span> Inline citations with relevance scores</li>
+          <li><span class="ic"><svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span> Grounded in your documents — no hallucinated facts</li>
+          <li><span class="ic"><svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg></span> Sub-second retrieval, ~2s end-to-end answers</li>
+        </ul>
+        <a href="app.html" class="btn btn-primary btn-lg" style="margin-top:8px">Open the app →</a>
+      </div>
+
+      <div class="mockup reveal d2">
+        <div class="mockup-bar">
+          <span class="d d1"></span><span class="d d2"></span><span class="d d3"></span>
+          <span class="url">scholarai.app/chat</span>
+        </div>
+        <div class="mockup-body" id="demoChat">
+          <div class="chat-bubble user">What is the attention mechanism?</div>
+          <div class="chat-bubble bot">
+            Attention lets a model weigh the relevance of every input token when producing each output, replacing recurrence with direct token-to-token connections for better long-range context.
+            <span class="cite">📄 Attention Is All You Need · p.3 · 0.94</span>
+          </div>
+          <div class="chat-bubble user">How is it computed?</div>
+          <div class="chat-bubble bot">
+            <span class="typing"><span></span><span></span><span></span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TECH STACK ============ -->
+  <section class="section section-sm" id="tech">
+    <div class="container">
+      <div class="text-center">
+        <span class="eyebrow reveal">✦ Built with</span>
+        <h2 class="section-title reveal d1">A modern, production stack</h2>
+        <p class="section-sub reveal d2">Async Python backend, managed vector storage and blazing-fast inference.</p>
+      </div>
+      <div class="tech-grid">
+        <div class="tech-card glass reveal"><span class="tech-emoji">⚡</span><div class="tname">FastAPI</div><div class="tdesc">Async REST API</div></div>
+        <div class="tech-card glass reveal d1"><span class="tech-emoji">🧠</span><div class="tname">Groq</div><div class="tdesc">LLaMA 3.1 inference</div></div>
+        <div class="tech-card glass reveal d2"><span class="tech-emoji">🔎</span><div class="tname">Qdrant</div><div class="tdesc">Vector search</div></div>
+        <div class="tech-card glass reveal d3"><span class="tech-emoji">🔗</span><div class="tname">LangChain</div><div class="tdesc">ReAct agent</div></div>
+        <div class="tech-card glass reveal"><span class="tech-emoji">📐</span><div class="tname">MiniLM</div><div class="tdesc">384-dim embeddings</div></div>
+        <div class="tech-card glass reveal d1"><span class="tech-emoji">🐳</span><div class="tname">Docker</div><div class="tdesc">Containerized</div></div>
+        <div class="tech-card glass reveal d2"><span class="tech-emoji">🤗</span><div class="tname">HF Spaces</div><div class="tdesc">Free hosting</div></div>
+        <div class="tech-card glass reveal d3"><span class="tech-emoji">📄</span><div class="tname">PyMuPDF</div><div class="tdesc">PDF extraction</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="section" id="faq" style="background:var(--bg-soft); border-top:1px solid var(--border)">
+    <div class="container">
+      <div class="text-center">
+        <span class="eyebrow reveal">✦ Questions</span>
+        <h2 class="section-title reveal d1">Frequently asked</h2>
+      </div>
+      <div class="faq reveal d2">
+        <div class="faq-item">
+          <button class="faq-q">Is it free to use? <span class="chev"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 9l-7 7-7-7"/></svg></span></button>
+          <div class="faq-a"><div class="faq-a-inner">Yes. The project is fully open source and the live demo runs on free-tier infrastructure (HuggingFace Spaces, Groq free API, Qdrant Cloud free cluster).</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">What file types are supported? <span class="chev"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 9l-7 7-7-7"/></svg></span></button>
+          <div class="faq-a"><div class="faq-a-inner">Currently PDF research papers up to 50MB. Text is extracted with PyMuPDF, chunked intelligently by section, then embedded and indexed.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">How are answers kept accurate? <span class="chev"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 9l-7 7-7-7"/></svg></span></button>
+          <div class="faq-a"><div class="faq-a-inner">Retrieval-Augmented Generation grounds every answer in retrieved passages from your own documents, and each answer ships with citations so you can verify the source.</div></div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-q">Can I self-host it? <span class="chev"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 9l-7 7-7-7"/></svg></span></button>
+          <div class="faq-a"><div class="faq-a-inner">Absolutely. Clone the repo, set your API keys in a .env file, and run with Docker Compose. Full instructions are in the README.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA ============ -->
+  <section class="section">
+    <div class="container">
+      <div class="cta-banner reveal">
+        <h2>Stop skimming.<br />Start <span class="grad-text">asking</span>.</h2>
+        <p>Upload your first paper and get a cited answer in under two seconds.</p>
+        <div class="hero-actions" style="margin-bottom:0">
+          <a href="app.html" class="btn btn-primary btn-lg">Launch ScholarAI →</a>
+          <a href="https://github.com/vamsi-op/AUTOMATED-RESEARCH-ASSISTANT" target="_blank" rel="noopener" class="btn btn-ghost btn-lg">Star on GitHub ★</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#top" class="brand">
+            <span class="brand-logo">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+            </span>
+            ScholarAI
+          </a>
+          <p>An open-source automated research assistant. RAG-powered, citation-backed answers from your own papers.</p>
+        </div>
+        <div>
+          <h5>Product</h5>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how">How it works</a></li>
+            <li><a href="app.html">Launch app</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5>Resources</h5>
+          <ul>
+            <li><a href="https://github.com/vamsi-op/AUTOMATED-RESEARCH-ASSISTANT" target="_blank" rel="noopener">GitHub</a></li>
+            <li><a href="https://github.com/vamsi-op/AUTOMATED-RESEARCH-ASSISTANT#readme" target="_blank" rel="noopener">Documentation</a></li>
+            <li><a href="app.html">Live demo</a></li>
+          </ul>
+        </div>
+        <div>
+          <h5>Tech</h5>
+          <ul>
+            <li><a href="#tech">Stack</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© <span id="year"></span> ScholarAI · Built by <a href="https://github.com/vamsi-op" target="_blank" rel="noopener" style="color:var(--brand-2)">vamsi-op</a></span>
+        <div class="social">
+          <a href="https://github.com/vamsi-op/AUTOMATED-RESEARCH-ASSISTANT" target="_blank" rel="noopener" aria-label="GitHub"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-1.7c-3.2.7-3.9-1.5-3.9-1.5-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.8-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/animations.js"></script>
+</body>
+</html>

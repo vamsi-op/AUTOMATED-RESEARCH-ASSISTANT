@@ -26,6 +26,7 @@ RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTr
 COPY app/ ./app/
 COPY main.py .
 COPY frontend/ ./frontend/
+COPY website/ ./website/
 COPY scripts/ ./scripts/
 
 # Create writable directories
