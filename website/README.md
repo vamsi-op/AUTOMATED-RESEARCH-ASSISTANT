@@ -1,4 +1,4 @@
-# ScholarAI — Marketing Website + App
+# Automated Research Assistant — Marketing Website + App
 
 A standalone, production-ready front end for the **Automated Research Assistant**, built with
 plain **HTML + CSS + vanilla JavaScript** (no build step, no framework runtime). It ships as
