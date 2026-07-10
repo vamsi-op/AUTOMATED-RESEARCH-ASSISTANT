@@ -46,21 +46,60 @@ SYSTEM = (
     "Never add information not present in the source."
 )
 
+# Per-type specification: depth, findings count, methodology detail, token budget.
+SUMMARY_SPECS = {
+    "brief": {
+        "instruction": (
+            "Write a BRIEF summary: 2-3 sentences capturing only the core problem "
+            "and the single main contribution. Keep it high-level and accessible to "
+            "a non-specialist. Do not go into technical detail."
+        ),
+        "findings": "exactly 2-3 short, plain-language key findings",
+        "methodology": "one short sentence describing the overall approach",
+        "max_tokens": 500,
+    },
+    "comprehensive": {
+        "instruction": (
+            "Write a COMPREHENSIVE summary: 2-3 full paragraphs covering the problem, "
+            "the proposed approach, the main results, and why they matter. Balance "
+            "depth with readability."
+        ),
+        "findings": "4-6 key findings, each a complete sentence",
+        "methodology": "a short paragraph describing the methodology and design",
+        "max_tokens": 1100,
+    },
+    "technical": {
+        "instruction": (
+            "Write a TECHNICAL deep-dive summary aimed at domain experts. Emphasize "
+            "the architecture/model details, datasets, training setup, evaluation "
+            "metrics and quantitative results. Use precise technical terminology and "
+            "include specific numbers where the text provides them."
+        ),
+        "findings": "5-8 technical key findings with concrete specifics (methods, metrics, numbers)",
+        "methodology": "a detailed technical description of the methodology, components and experimental setup",
+        "max_tokens": 1600,
+    },
+}
+
 PROMPT = """Summarize the following research paper.
 
 Paper sections:
 {text}
 
-Provide a {summary_type} summary with this exact JSON structure:
+INSTRUCTIONS:
+{instruction}
+- key_findings: provide {findings}.
+- methodology: {methodology}.
+- Base everything ONLY on the provided text; never invent details.
+
+Return ONLY valid JSON with this exact structure (no extra text):
 {{
   "title": "paper title",
-  "summary": "main summary paragraph",
-  "key_findings": ["finding 1", "finding 2", "finding 3"],
-  "methodology": "brief methodology description",
+  "summary": "the summary text following the instructions above",
+  "key_findings": ["..."],
+  "methodology": "...",
   "limitations": "limitations if mentioned, else null"
-}}
-
-Return only valid JSON, no extra text."""
+}}"""
 
 SECTION_PRIORITY = ["abstract", "introduction", "results", "conclusion",
                     "methodology", "methods", "unknown"]
@@ -106,7 +145,13 @@ class SummarizationService:
                 assembled.append(block)
                 budget -= len(block)
 
-        prompt = PROMPT.format(text="\n\n".join(assembled), summary_type=request.summary_type)
+        spec = SUMMARY_SPECS.get(request.summary_type, SUMMARY_SPECS["comprehensive"])
+        prompt = PROMPT.format(
+            text="\n\n".join(assembled),
+            instruction=spec["instruction"],
+            findings=spec["findings"],
+            methodology=spec["methodology"],
+        )
 
         raw = ""
         try:
@@ -114,7 +159,7 @@ class SummarizationService:
                 prompt=prompt,
                 system_prompt=SYSTEM,
                 temperature=0.2,
-                max_tokens=1024,
+                max_tokens=spec["max_tokens"],
             )
             match = re.search(r'\{.*\}', raw, re.DOTALL)
             data = json.loads(match.group() if match else raw)

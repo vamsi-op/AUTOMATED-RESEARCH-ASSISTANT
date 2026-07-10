@@ -9,20 +9,16 @@ class RAGPrompts:
     
     SYSTEM_PROMPT = """You are a research assistant AI that helps users understand academic papers.
 
-CRITICAL RULES FOR PREVENTING HALLUCINATIONS:
-1. ONLY use information explicitly stated in the provided context
-2. ALWAYS cite sources using [Paper Title, Authors] format after each claim
-3. If information is NOT in the context, say: "I don't have information about this in the provided papers"
-4. NEVER make assumptions or use external knowledge
-5. NEVER infer information not explicitly stated
-6. If papers contradict each other, mention both perspectives with citations
-7. If you're uncertain, express that uncertainty explicitly
+RULES:
+1. Answer using ONLY the information in the provided sources. Never use outside knowledge or make assumptions.
+2. If the answer is not in the sources, reply exactly: "I don't have information about this in the provided papers."
+3. If sources disagree, briefly present both views.
 
-CITATION FORMAT:
-- After each factual claim, add: [Paper Title, Authors, Year]
-- Example: "Transformers use self-attention mechanisms [Attention Is All You Need, Vaswani et al., 2017]."
-
-Your goal is to provide accurate, well-cited answers based SOLELY on the research papers provided."""
+WRITING STYLE (important for readability):
+- Write clear, natural prose in short paragraphs.
+- Use bullet points when listing findings, steps, or components.
+- Keep it concise — no filler, no repetition.
+- Do NOT put any citations, source numbers, brackets, paper titles, author names, section names, or relevance scores inside your answer. The source paper is displayed to the user separately, so just write the answer cleanly."""
     
     @staticmethod
     def build_rag_prompt(
@@ -41,106 +37,48 @@ Your goal is to provide accurate, well-cited answers based SOLELY on the researc
         Returns:
             Formatted prompt
         """
-        # Build context with proper citations
+        # Build numbered context. The model only ever sees a clean "[n] Title — Authors"
+        # header so it can cite with [n] without copying metadata into the prose.
         context_parts = []
-        
+
         for i, chunk in enumerate(context_chunks, 1):
             paper_meta = chunk.get('paper_metadata', {})
             title = paper_meta.get('title', 'Unknown Paper')
             authors = paper_meta.get('authors', [])
-            year = paper_meta.get('publication_year', 'N/A')
-            section = chunk.get('section', 'unknown')
-            page = chunk.get('page_number')
             text = chunk.get('text', '')
-            score = chunk.get('score', 0.0)
-            
-            # Format authors
+
+            # Format authors compactly
             if authors:
-                if len(authors) > 3:
-                    author_str = f"{authors[0]} et al."
-                elif len(authors) > 1:
-                    author_str = ", ".join(authors[:-1]) + f" and {authors[-1]}"
-                else:
-                    author_str = authors[0]
+                author_str = authors[0] + (" et al." if len(authors) > 1 else "")
             else:
                 author_str = "Unknown Authors"
-            
-            # Build citation reference
-            citation = f"[{title}, {author_str}, {year}]"
-            
-            # Build context entry
-            context_entry = f"""
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-SOURCE {i}: {citation}
-Section: {section.upper()}"""
-            
-            if page:
-                context_entry += f" | Page: {page}"
-            
-            context_entry += f" | Relevance: {score:.2f}"
-            context_entry += f"\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n{text}\n"
-            
-            context_parts.append(context_entry)
-        
-        context = "\n".join(context_parts)
-        
-        # Base prompt
-        prompt = f"""Answer the following question based ONLY on the provided research paper excerpts.
 
-═══════════════════════════════════════════════════════════════════════════
-INSTRUCTIONS FOR CITATION-AWARE ANSWERING:
-═══════════════════════════════════════════════════════════════════════════
+            context_parts.append(
+                f"[{i}] {title} — {author_str}\n{text.strip()}"
+            )
 
-1. USE ONLY THE SOURCES BELOW
-   - Do not use any external knowledge
-   - Do not make assumptions beyond what is stated
-   
-2. CITE EVERY CLAIM
-   - After each factual statement, add the citation: [Paper Title, Authors, Year]
-   - Example: "The model achieved 95% accuracy [Paper X, Smith et al., 2023]."
-   
-3. HANDLE MISSING INFORMATION
-   - If the answer is not in the sources, say: "I don't have information about this in the provided papers."
-   - Do not try to answer from general knowledge
-   
-4. HANDLE CONTRADICTIONS
-   - If sources disagree, present both views with citations
-   - Example: "Paper A found X [Citation A], while Paper B found Y [Citation B]."
-   
-5. EXPRESS UNCERTAINTY
-   - If information is partial or unclear, say so explicitly
-   - Use phrases like "Based on the limited information provided..." or "The sources suggest..."
+        context = "\n\n".join(context_parts)
 
-═══════════════════════════════════════════════════════════════════════════
-RESEARCH PAPER SOURCES:
-═══════════════════════════════════════════════════════════════════════════
+        prompt = f"""Answer the question using ONLY the numbered sources below.
 
+SOURCES:
 {context}
 
-═══════════════════════════════════════════════════════════════════════════
 QUESTION:
-═══════════════════════════════════════════════════════════════════════════
-
 {question}
 
-═══════════════════════════════════════════════════════════════════════════
-YOUR ANSWER (with citations after each claim):
-═══════════════════════════════════════════════════════════════════════════
-"""
-        
-        # Add confidence assessment if requested
+Write a clear, well-structured answer following the style rules. Do NOT include any
+brackets, source numbers, titles, authors, sections, or scores — just clean prose.
+
+ANSWER:"""
+
+        # Add confidence assessment if requested (stripped out before display)
         if include_confidence:
             prompt += """
 
-After your answer, provide:
+After your answer, on a new line, add:
+CONFIDENCE ASSESSMENT: [High/Medium/Low]"""
 
-CONFIDENCE ASSESSMENT:
-- Confidence Level: [High/Medium/Low]
-- Reasoning: [Why this confidence level?]
-- Information Gaps: [What information is missing or unclear?]
-- Caveats: [Any important limitations or caveats?]
-"""
-        
         return prompt
     
     @staticmethod

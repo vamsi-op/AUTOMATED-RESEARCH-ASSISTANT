@@ -308,6 +308,127 @@ ul { list-style: none; }
 .step p { color: var(--text-muted); font-size: 0.9rem; }
 
 /* ============================================================================
+   ANIMATED PIPELINE STAGE (Upload → Embed → Retrieve → Generate)
+   ============================================================================ */
+.pipeline-stage { max-width: 860px; margin: 56px auto 0; }
+.stage-viewport {
+  position: relative; height: 320px; border-radius: var(--radius-lg);
+  overflow: hidden; border: 1px solid var(--border-strong);
+}
+.scene {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 22px; padding: 28px;
+  opacity: 0; transform: scale(0.98); pointer-events: none;
+  transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+}
+.scene.active { opacity: 1; transform: none; pointer-events: auto; }
+.scene-cap { font-size: 0.9rem; color: var(--text-muted); text-align: center; }
+
+/* Step selector */
+.stage-steps {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 18px;
+  position: relative;
+}
+.pstep {
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  padding: 12px 10px; border-radius: var(--radius-sm); color: var(--text-muted);
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  font-weight: 600; font-size: 0.92rem; transition: all 0.3s var(--ease);
+}
+.pstep-num {
+  width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 0.8rem; background: var(--surface-2); border: 1px solid var(--border-strong);
+  transition: all 0.3s var(--ease);
+}
+.pstep.active {
+  color: #fff; border-color: transparent;
+  background: linear-gradient(135deg, rgba(99,102,241,0.22), rgba(139,92,246,0.16));
+  box-shadow: 0 8px 26px -12px var(--brand);
+}
+.pstep.active .pstep-num { background: var(--grad-brand); border-color: transparent; color: #fff; }
+.pstep:hover { color: var(--text); }
+
+/* ── Scene 1: Upload ─────────────────────────────────────────────────────── */
+.up-dropzone {
+  width: min(440px, 90%); border: 2px dashed var(--border-strong); border-radius: var(--radius);
+  padding: 26px; display: flex; flex-direction: column; gap: 16px; align-items: center;
+}
+.scene-upload.active .up-dropzone { animation: dzPulse 3.4s ease; }
+.up-file {
+  width: 100%; display: flex; align-items: center; gap: 14px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px;
+  opacity: 0; transform: translateY(24px);
+}
+.scene-upload.active .up-file { animation: fileDrop 0.7s var(--ease) forwards; }
+.up-file-ic {
+  width: 44px; height: 44px; border-radius: 10px; display: grid; place-items: center;
+  font-size: 0.72rem; font-weight: 800; color: #fff; background: linear-gradient(135deg,#ef4444,#b91c1c);
+  flex-shrink: 0;
+}
+.up-file-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+.up-file-name { font-size: 0.85rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.up-bar { height: 6px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.up-bar i { display: block; height: 100%; width: 0; background: var(--grad-brand); border-radius: 4px; }
+.scene-upload.active .up-bar i { animation: barFill 2s var(--ease) 0.6s forwards; }
+.up-check {
+  width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center;
+  background: rgba(52,211,153,0.15); color: var(--success); font-weight: 800; flex-shrink: 0;
+  opacity: 0; transform: scale(0.5);
+}
+.scene-upload.active .up-check { animation: popIn 0.4s var(--ease) 2.5s forwards; }
+.up-hint { font-size: 0.8rem; color: var(--text-dim); }
+
+/* ── Scene 2: Embed ──────────────────────────────────────────────────────── */
+.em-flow { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; justify-content: center; }
+.em-doc { font-size: 2.4rem; opacity: 0; transform: scale(0.6); }
+.scene-embed.active .em-doc { animation: popIn 0.5s var(--ease) forwards; }
+.em-chunks { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.em-chunk { width: 44px; height: 12px; border-radius: 4px; background: var(--surface-2); border: 1px solid var(--border); opacity: 0; transform: translateX(-10px); }
+.scene-embed.active .em-chunk { animation: chunkIn 0.4s var(--ease) forwards; }
+.scene-embed.active .em-chunk:nth-child(1) { animation-delay: 0.3s; }
+.scene-embed.active .em-chunk:nth-child(2) { animation-delay: 0.45s; }
+.scene-embed.active .em-chunk:nth-child(3) { animation-delay: 0.6s; }
+.scene-embed.active .em-chunk:nth-child(4) { animation-delay: 0.75s; }
+.em-arrow { color: var(--brand-2); font-size: 1.4rem; opacity: 0; }
+.scene-embed.active .em-arrow { animation: fadeInUp 0.4s ease 0.9s forwards; }
+.em-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; }
+.em-dot { width: 11px; height: 11px; border-radius: 50%; background: var(--brand); opacity: 0; transform: scale(0); box-shadow: 0 0 8px var(--brand); }
+.scene-embed.active .em-dot { animation: dotPop 0.4s var(--ease) forwards; }
+
+/* ── Scene 3: Retrieve ───────────────────────────────────────────────────── */
+.rt-query {
+  padding: 11px 18px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border-strong);
+  font-size: 0.9rem; color: var(--text); opacity: 0; transform: translateY(-10px);
+}
+.scene-retrieve.active .rt-query { animation: fadeInUp 0.5s var(--ease) forwards; }
+.rt-field { position: relative; display: grid; grid-template-columns: repeat(10, 1fr); gap: 10px; }
+.rt-node { width: 12px; height: 12px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border-strong); transition: all 0.4s var(--ease); }
+.rt-node.hit { background: var(--brand-3); border-color: transparent; box-shadow: 0 0 14px var(--brand-3); transform: scale(1.7); }
+
+/* ── Scene 4: Generate ───────────────────────────────────────────────────── */
+.gen-bubble {
+  width: min(500px, 92%); background: var(--surface); border: 1px solid var(--border);
+  border-radius: 14px; border-bottom-left-radius: 4px; padding: 18px 20px; font-size: 0.95rem; line-height: 1.6;
+}
+.gen-text { color: var(--text); }
+.gen-cursor { display: inline-block; width: 2px; height: 1em; background: var(--brand-2); margin-left: 2px; vertical-align: text-bottom; animation: blink 1s step-end infinite; }
+.gen-cite {
+  display: inline-block; margin-top: 14px; font-size: 0.74rem; font-family: var(--font-mono);
+  padding: 5px 10px; border-radius: 8px; background: rgba(99,102,241,0.12); color: var(--brand-2);
+  border: 1px solid rgba(99,102,241,0.22); opacity: 0;
+}
+.gen-cite.show { animation: fadeInUp 0.4s var(--ease) forwards; }
+
+/* Scene keyframes */
+@keyframes fileDrop { to { opacity: 1; transform: none; } }
+@keyframes barFill { to { width: 100%; } }
+@keyframes popIn { to { opacity: 1; transform: scale(1); } }
+@keyframes chunkIn { to { opacity: 1; transform: none; } }
+@keyframes dotPop { to { opacity: 1; transform: scale(1); } }
+@keyframes blink { 50% { opacity: 0; } }
+@keyframes dzPulse { 0%,100% { border-color: var(--border-strong); } 50% { border-color: var(--brand); } }
+
+/* ============================================================================
    SHOWCASE / MOCKUP
    ============================================================================ */
 .showcase { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
@@ -439,6 +560,10 @@ ul { list-style: none; }
   .footer-grid { grid-template-columns: 1fr; gap: 28px; }
   .hero-actions { flex-direction: column; align-items: stretch; }
   .cta-banner { padding: 44px 22px; }
+  .stage-viewport { height: 300px; }
+  .pstep-label { display: none; }
+  .pstep { padding: 12px 6px; }
+  .rt-field { grid-template-columns: repeat(6, 1fr); }
 }
 
 @media (prefers-reduced-motion: reduce) {

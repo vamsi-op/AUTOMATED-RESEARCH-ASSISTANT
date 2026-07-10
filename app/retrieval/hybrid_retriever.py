@@ -45,12 +45,30 @@ class HybridRetriever:
             # Async embedding — does NOT block the event loop
             embedding = await self.embedding_service.embed_query_async(query)
 
+            threshold = min_score if min_score is not None else settings.min_similarity_score
+
             results = await self.qdrant.search(
                 query_embedding=embedding,
                 top_k=top_k,
                 filters=filters,
-                score_threshold=min_score or settings.min_similarity_score,
+                score_threshold=threshold,
             )
+
+            # Fallback: generic/abstract questions can score below the threshold
+            # for every chunk, returning nothing even when relevant papers exist.
+            # Retry without the threshold so the best-matching chunks are still
+            # surfaced and the LLM can ground its answer.
+            if not results and threshold > 0:
+                results = await self.qdrant.search(
+                    query_embedding=embedding,
+                    top_k=top_k,
+                    filters=filters,
+                    score_threshold=0.0,
+                )
+                app_logger.info(
+                    f"Threshold {threshold} filtered all results; "
+                    f"fallback returned {len(results)} chunks"
+                )
 
             app_logger.info(f"Retrieved {len(results)} chunks in {time.time()-start:.3f}s")
             return results

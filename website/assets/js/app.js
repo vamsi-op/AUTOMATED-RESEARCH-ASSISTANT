@@ -28,11 +28,13 @@
     },
     health() { return this._req("/health"); },
     listPapers() { return this._req("/papers?limit=100"); },
-    query(question, topK = 5) {
+    query(question, topK = 5, filters = null) {
+      const body = { question, top_k: topK, include_citations: true };
+      if (filters) body.filters = filters;
       return this._req("/query", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question, top_k: topK, include_citations: true }),
+        body: JSON.stringify(body),
       });
     },
     summarize(paperId, type) {
@@ -110,7 +112,7 @@
     document.querySelectorAll(".tab").forEach((b) => b.classList.toggle("active", b === btn));
     document.querySelectorAll(".panel").forEach((p) => p.classList.toggle("active", p.id === "panel-" + tab));
     if (tab === "papers") loadPapers();
-    if (tab === "summarize") loadPaperOptions();
+    if (tab === "summarize" || tab === "chat") loadPaperOptions();
   });
 
   /* ------------------------------------------------------------------ */
@@ -126,9 +128,7 @@
       const ok = h.qdrant_connected && h.groq_available;
       pill.className = "status-pill " + (ok ? "ok" : "bad");
       pill.querySelector(".dot").classList.remove("pulse");
-      text.innerHTML = ok
-        ? `Healthy · Qdrant ✓ · Groq ✓`
-        : `Degraded · Qdrant ${h.qdrant_connected ? "✓" : "✗"} · Groq ${h.groq_available ? "✓" : "✗"}`;
+      text.textContent = ok ? "Healthy" : "Degraded";
     } catch (e) {
       healthTries++;
       pill.className = "status-pill";
@@ -161,13 +161,14 @@
     addMsg("user", escapeHtml(q));
     const loading = addMsg("bot", `<span class="loading-row"><span class="spinner"></span> Thinking…</span>`);
     try {
-      const data = await api.query(q);
+      const paperId = $("chatPaper") ? $("chatPaper").value : "";
+      const filters = paperId ? { paper_id: paperId } : null;
+      const data = await api.query(q, 5, filters);
       let html = escapeHtml(data.answer || "No answer returned.");
       if (data.citations && data.citations.length) {
         html += '<div class="cites">';
         data.citations.forEach((c) => {
-          const score = c.relevance_score != null ? " · " + c.relevance_score.toFixed(2) : "";
-          html += `<span class="cite">📄 ${escapeHtml(c.paper_title || "Source")}${c.page_number ? " · p." + c.page_number : ""}${score}</span>`;
+          html += `<span class="cite">📄 ${escapeHtml(c.paper_title || "Source")}${c.page_number ? " · p." + c.page_number : ""}</span>`;
         });
         html += "</div>";
       }
@@ -317,15 +318,26 @@
   /* ------------------------------------------------------------------ */
   async function loadPaperOptions() {
     const sel = $("sumPaper");
+    const chatSel = $("chatPaper");
     try {
       const papers = await api.listPapers();
-      if (!papers.length) { sel.innerHTML = "<option value=''>Upload a paper first</option>"; return; }
-      sel.innerHTML = papers.map((p) => {
+      const opts = papers.map((p) => {
         const m = p.metadata || {};
         return `<option value="${escapeHtml(p.paper_id)}">${escapeHtml((m.title || p.paper_id).slice(0, 80))}</option>`;
       }).join("");
+
+      // Summarize selector
+      sel.innerHTML = papers.length ? opts : "<option value=''>Upload a paper first</option>";
+
+      // Chat scope selector — keep "All papers" and preserve current choice
+      if (chatSel) {
+        const prev = chatSel.value;
+        chatSel.innerHTML = '<option value="">All papers</option>' + opts;
+        if (prev && papers.some((p) => p.paper_id === prev)) chatSel.value = prev;
+      }
     } catch (e) {
       sel.innerHTML = "<option value=''>Could not load papers</option>";
+      if (chatSel) chatSel.innerHTML = '<option value="">All papers</option>';
     }
   }
 
@@ -371,28 +383,6 @@
     } catch (e) {
       out.innerHTML = `<div style="color:var(--danger); margin-top:16px">⚠️ ${escapeHtml(e.message)}</div>`;
     }
-  });
-
-  /* ------------------------------------------------------------------ */
-  /*  Settings modal                                                     */
-  /* ------------------------------------------------------------------ */
-  const modal = $("settingsModal");
-  $("settingsBtn").addEventListener("click", () => {
-    $("apiInput").value = cfg.API_BASE_URL;
-    modal.classList.add("open");
-  });
-  $("settingsCancel").addEventListener("click", () => modal.classList.remove("open"));
-  modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.remove("open"); });
-  $("settingsSave").addEventListener("click", () => {
-    const url = $("apiInput").value.trim();
-    if (!url) { toast("Enter a valid URL", "error"); return; }
-    cfg.setBackend(url);
-    modal.classList.remove("open");
-    toast("Reconnecting to " + url, "info");
-    healthTries = 0;
-    checkHealth();
-    loadPapers();
-    loadPaperOptions();
   });
 
   /* ------------------------------------------------------------------ */

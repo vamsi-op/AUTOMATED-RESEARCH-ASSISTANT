@@ -60,9 +60,6 @@
       <div class="orb orb-3"></div>
     </div>
     <div class="container hero-inner">
-      <div class="hero-badge reveal in">
-        <span class="dot"></span> Live · Powered by RAG + Groq LLaMA 3.1
-      </div>
       <h1 class="reveal in">
         Turn research papers into<br />
         <span class="grad-text">cited answers</span> in seconds
@@ -73,7 +70,7 @@
       </p>
       <div class="hero-actions reveal in d2">
         <a href="app.html" class="btn btn-primary btn-lg">
-          Try it free
+          Try it
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
         </a>
         <a href="#how" class="btn btn-ghost btn-lg">See how it works</a>
@@ -164,11 +161,62 @@
         <h2 class="section-title reveal d1">From PDF to answer in four steps</h2>
         <p class="section-sub reveal d2">A transparent RAG pipeline — no black boxes.</p>
       </div>
-      <div class="steps">
-        <div class="step reveal"><div class="step-num">1</div><h4>Upload</h4><p>Drop in a research PDF. We extract text, metadata and section structure.</p></div>
-        <div class="step reveal d1"><div class="step-num">2</div><h4>Embed</h4><p>Text is chunked and turned into 384-dim vectors, indexed in Qdrant Cloud.</p></div>
-        <div class="step reveal d2"><div class="step-num">3</div><h4>Retrieve</h4><p>Your question triggers hybrid search to pull the most relevant passages.</p></div>
-        <div class="step reveal d3"><div class="step-num">4</div><h4>Generate</h4><p>Groq's LLaMA 3.1 composes a grounded answer with inline citations.</p></div>
+      <div class="pipeline-stage reveal" id="pipeline-stage">
+        <div class="stage-viewport glass">
+
+          <!-- 1 · UPLOAD -->
+          <div class="scene scene-upload active" data-scene="0">
+            <div class="up-dropzone">
+              <div class="up-file">
+                <div class="up-file-ic">PDF</div>
+                <div class="up-file-meta">
+                  <span class="up-file-name">attention_is_all_you_need.pdf</span>
+                  <span class="up-bar"><i></i></span>
+                </div>
+                <div class="up-check">✓</div>
+              </div>
+              <div class="up-hint">Extracting text · metadata · sections</div>
+            </div>
+          </div>
+
+          <!-- 2 · EMBED -->
+          <div class="scene scene-embed" data-scene="1">
+            <div class="em-flow">
+              <div class="em-doc">📄</div>
+              <div class="em-chunks">
+                <span class="em-chunk"></span><span class="em-chunk"></span>
+                <span class="em-chunk"></span><span class="em-chunk"></span>
+              </div>
+              <div class="em-arrow">➜</div>
+              <div class="em-grid" id="em-grid"></div>
+            </div>
+            <div class="scene-cap">Chunked &amp; embedded into 384-dim vectors</div>
+          </div>
+
+          <!-- 3 · RETRIEVE -->
+          <div class="scene scene-retrieve" data-scene="2">
+            <div class="rt-query">🔎 “What is the attention mechanism?”</div>
+            <div class="rt-field" id="rt-field"></div>
+            <div class="scene-cap">Hybrid search pulls the most relevant passages</div>
+          </div>
+
+          <!-- 4 · GENERATE -->
+          <div class="scene scene-generate" data-scene="3">
+            <div class="gen-bubble">
+              <span class="gen-text" id="gen-text"></span><span class="gen-cursor"></span>
+              <span class="gen-cite">📄 Attention Is All You Need</span>
+            </div>
+            <div class="scene-cap">LLaMA 3.1 composes a grounded, cited answer</div>
+          </div>
+
+        </div>
+
+        <div class="stage-steps" id="stage-steps">
+          <button class="pstep active" data-i="0"><span class="pstep-num">1</span><span class="pstep-label">Upload</span></button>
+          <button class="pstep" data-i="1"><span class="pstep-num">2</span><span class="pstep-label">Embed</span></button>
+          <button class="pstep" data-i="2"><span class="pstep-num">3</span><span class="pstep-label">Retrieve</span></button>
+          <button class="pstep" data-i="3"><span class="pstep-num">4</span><span class="pstep-label">Generate</span></button>
+        </div>
       </div>
     </div>
   </section>
@@ -223,7 +271,7 @@
         <div class="tech-card glass reveal d3"><span class="tech-emoji">🔗</span><div class="tname">LangChain</div><div class="tdesc">ReAct agent</div></div>
         <div class="tech-card glass reveal"><span class="tech-emoji">📐</span><div class="tname">MiniLM</div><div class="tdesc">384-dim embeddings</div></div>
         <div class="tech-card glass reveal d1"><span class="tech-emoji">🐳</span><div class="tname">Docker</div><div class="tdesc">Containerized</div></div>
-        <div class="tech-card glass reveal d2"><span class="tech-emoji">🤗</span><div class="tname">HF Spaces</div><div class="tdesc">Free hosting</div></div>
+        <div class="tech-card glass reveal d2"><span class="tech-emoji">🤗</span><div class="tname">HF Spaces</div><div class="tdesc">Hosting</div></div>
         <div class="tech-card glass reveal d3"><span class="tech-emoji">📄</span><div class="tname">PyMuPDF</div><div class="tdesc">PDF extraction</div></div>
       </div>
     </div>
@@ -239,19 +287,15 @@
       <div class="faq reveal d2">
         <div class="faq-item">
           <button class="faq-q">Is it free to use? <span class="chev"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 9l-7 7-7-7"/></svg></span></button>
-          <div class="faq-a"><div class="faq-a-inner">Yes. The project is fully open source and the live demo runs on free-tier infrastructure (HuggingFace Spaces, Groq free API, Qdrant Cloud free cluster).</div></div>
+          <div class="faq-a"><div class="faq-a-inner">Yes. The project is fully open source and the free to use.</div></div>
         </div>
         <div class="faq-item">
           <button class="faq-q">What file types are supported? <span class="chev"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 9l-7 7-7-7"/></svg></span></button>
-          <div class="faq-a"><div class="faq-a-inner">Currently PDF research papers up to 50MB. Text is extracted with PyMuPDF, chunked intelligently by section, then embedded and indexed.</div></div>
+          <div class="faq-a"><div class="faq-a-inner">Currently PDF research papers up to 50MB.</div></div>
         </div>
         <div class="faq-item">
           <button class="faq-q">How are answers kept accurate? <span class="chev"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 9l-7 7-7-7"/></svg></span></button>
           <div class="faq-a"><div class="faq-a-inner">Retrieval-Augmented Generation grounds every answer in retrieved passages from your own documents, and each answer ships with citations so you can verify the source.</div></div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q">Can I self-host it? <span class="chev"><svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M19 9l-7 7-7-7"/></svg></span></button>
-          <div class="faq-a"><div class="faq-a-inner">Absolutely. Clone the repo, set your API keys in a .env file, and run with Docker Compose. Full instructions are in the README.</div></div>
         </div>
       </div>
     </div>
@@ -319,5 +363,6 @@
 
   <script src="assets/js/config.js"></script>
   <script src="assets/js/animations.js"></script>
+  <script src="assets/js/pipeline.js"></script>
 </body>
 </html>

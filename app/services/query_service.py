@@ -25,6 +25,9 @@ from app.utils.logger import app_logger
 _QUERY_CACHE: Dict[str, tuple] = {}
 _CACHE_TTL = 120  # seconds
 
+# Minimum best-chunk similarity for a question to count as "on-topic".
+_RELEVANCE_FLOOR = 0.1
+
 
 def _cache_key(question: str, top_k: int, filters: Any) -> str:
     raw = json.dumps({"q": question, "k": top_k, "f": filters}, sort_keys=True)
@@ -65,10 +68,27 @@ class QueryService:
             app_logger.info(f"Cache hit for query: {request.question[:60]}")
             return cached
 
+        # Handle greetings / small talk without touching the RAG pipeline.
+        smalltalk = self._handle_smalltalk(request.question)
+        if smalltalk is not None:
+            return QueryResponse(
+                answer=smalltalk,
+                citations=[],
+                confidence=1.0,
+                processing_time=time.time() - start,
+                retrieved_chunks=0,
+            )
+
         try:
             # 1. Retrieve (async embedding inside)
             chunks = await self._retrieve_chunks(request)
             if not chunks:
+                return self._no_results(request, start)
+
+            # Relevance guard: if even the best chunk barely matches, the question
+            # is off-topic for the indexed papers — don't force an answer.
+            top_score = max((c.get("score", 0.0) for c in chunks), default=0.0)
+            if top_score < _RELEVANCE_FLOOR:
                 return self._no_results(request, start)
 
             # 2. Build prompt
@@ -121,32 +141,59 @@ class QueryService:
             raise RetrievalError("Failed to retrieve chunks", detail=str(e))
 
     def _extract_citations(self, answer: str, chunks: List[Dict]) -> List[Citation]:
-        citations = []
-        seen = set()
-        answer_lower = answer.lower()
+        """Build one citation per source paper actually used as context.
+
+        The answer is grounded on these retrieved chunks, so we surface them as
+        citation chips regardless of whether the title is quoted in the prose.
+        Keeps the highest-scoring chunk per paper.
+        """
+        # Skip citations for explicit "no information" answers.
+        if "don't have information" in answer.lower():
+            return []
+
+        # Best-scoring chunk per paper.
+        best_by_paper: Dict[str, Dict] = {}
         for chunk in chunks:
-            meta = chunk.get("paper_metadata", {})
             pid = chunk.get("paper_id", "")
-            if pid in seen:
+            if not pid:
                 continue
-            title = meta.get("title", "Unknown Paper")
-            authors = meta.get("authors", [])
-            if title.lower() in answer_lower or any(a.lower() in answer_lower for a in authors):
-                snippet = chunk.get("text", "")[:200]
-                citations.append(Citation(
-                    paper_id=pid,
-                    paper_title=title,
-                    authors=authors,
-                    chunk_id=chunk.get("chunk_id", ""),
-                    page_number=chunk.get("page_number"),
-                    relevance_score=chunk.get("score", 0.0),
-                    text_snippet=snippet + ("..." if len(chunk.get("text", "")) > 200 else ""),
-                ))
-                seen.add(pid)
+            if pid not in best_by_paper or chunk.get("score", 0.0) > best_by_paper[pid].get("score", 0.0):
+                best_by_paper[pid] = chunk
+
+        if not best_by_paper:
+            return []
+
+        # Only cite papers whose best chunk is genuinely relevant (cleared the
+        # primary threshold). This avoids citing a paper that only had a weak,
+        # tangential match. If none cleared it (fallback retrieval), cite just
+        # the single best-matching paper.
+        threshold = settings.min_similarity_score
+        relevant = {
+            pid: c for pid, c in best_by_paper.items()
+            if c.get("score", 0.0) >= threshold
+        }
+        if not relevant:
+            top_pid = max(best_by_paper, key=lambda p: best_by_paper[p].get("score", 0.0))
+            relevant = {top_pid: best_by_paper[top_pid]}
+
+        citations = []
+        for pid, chunk in relevant.items():
+            meta = chunk.get("paper_metadata", {})
+            text = chunk.get("text", "")
+            snippet = text[:200] + ("..." if len(text) > 200 else "")
+            citations.append(Citation(
+                paper_id=pid,
+                paper_title=meta.get("title", "Unknown Paper"),
+                authors=meta.get("authors", []),
+                chunk_id=chunk.get("chunk_id", ""),
+                page_number=chunk.get("page_number"),
+                relevance_score=chunk.get("score", 0.0),
+                text_snippet=snippet,
+            ))
         return citations
 
     def _assess_confidence(self, answer: str, chunks: List[Dict]) -> float:
-        """Single-pass confidence scoring."""
+        """Single-pass confidence scoring based on grounding + certainty."""
         a = answer.lower()
         no_info = any(p in a for p in (
             "don't have information", "not in the provided", "cannot find",
@@ -159,13 +206,13 @@ class QueryService:
             "may", "might", "possibly", "perhaps", "suggests", "appears", "seems",
         ) if p in a)
 
-        citation_count = answer.count("[")
-        avg_score = sum(c.get("score", 0) for c in chunks) / len(chunks) if chunks else 0
+        # Best retrieval score reflects how well the sources match the question.
+        top_score = max((c.get("score", 0.0) for c in chunks), default=0.0)
 
         return round(
-            min(citation_count / 5, 1.0) * 0.4
-            + max(0.0, 1.0 - uncertainty * 0.2) * 0.3
-            + min(avg_score / 10, 1.0) * 0.3,
+            0.55                                      # grounded in retrieved sources
+            + max(0.0, 1.0 - uncertainty * 0.1) * 0.25  # certainty of language
+            + min(top_score, 1.0) * 0.2,              # relevance of best source
             2,
         )
 
@@ -174,6 +221,31 @@ class QueryService:
             if marker in answer:
                 return answer.split(marker)[0].strip()
         return answer
+
+    def _handle_smalltalk(self, question: str) -> Optional[str]:
+        """Return a friendly reply for greetings / small talk, else None."""
+        q = question.strip().lower().rstrip("!.?")
+
+        greetings = {
+            "hi", "hii", "hey", "hello", "helo", "yo", "hola", "sup",
+            "good morning", "good afternoon", "good evening", "greetings",
+            "hi there", "hey there", "hello there", "howdy",
+        }
+        thanks = {"thanks", "thank you", "thx", "ty", "thankyou", "appreciate it"}
+        farewells = {"bye", "goodbye", "see you", "cya", "later"}
+        howareyou = {"how are you", "how's it going", "hows it going", "what's up", "whats up"}
+
+        if q in greetings or q in howareyou:
+            return (
+                "Hi! I'm your research assistant. Upload a paper and ask me about it — "
+                "for example: “What is the main contribution?”, “Summarize the methodology”, "
+                "or “What are the limitations?”"
+            )
+        if q in thanks:
+            return "You're welcome! Ask me anything about your papers."
+        if q in farewells:
+            return "Goodbye! Come back anytime you need to dig into a paper."
+        return None
 
     def _should_boost(self, question: str) -> bool:
         q = question.lower()
